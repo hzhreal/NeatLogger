@@ -152,7 +152,9 @@ void log_to_file(const char *file, const char *func, int line, LogFileHandler *h
         if (filesize > handler->maxsize && strlen(handler->filepath) + LOG_ROLL_OVER_SUFFIX_LEN + 1 < sizeof(handler->filepath)) {
             for (i = 0; i < LOG_ROLL_OVER_MAX; i++) {
                 gen_filename(handler, i);
-                log_init_file_handler(handler->filepath, handler->maxsize, handler);
+                if (log_init_file_handler(handler->filepath, handler->maxsize, handler) == -1) {
+                    continue;
+                }
                 filesize = ftell(handler->stream);
                 if (filesize < handler->maxsize) {
                     break;
