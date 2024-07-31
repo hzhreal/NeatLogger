@@ -68,6 +68,7 @@ static void gen_filename(LogFileHandler *handler, uint8_t idx) {
     else {
         strncat(handler->filepath, suffix, sizeof(suffix) - 1);
     }
+    return;
 }
 
 void log_kill_file_handler(LogFileHandler *handler) {
@@ -186,6 +187,7 @@ void log_to_file(const char *file, const char *func, int line, LogFileHandler *h
     fflush(handler->stream);
 end:
     va_end(args);
+    return;
 }
 
 void log_to_stream(const char *file, const char *func, int line, FILE *stream, LogLevel level, uint8_t flags, const char *fmt, ...) {
@@ -243,4 +245,5 @@ void log_to_stream(const char *file, const char *func, int line, FILE *stream, L
     fprintf(stream, "\n");
     fflush(stream);
     va_end(args);
+    return;
 }
