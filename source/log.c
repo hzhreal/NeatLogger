@@ -57,6 +57,7 @@ static const char *level_to_str(LogLevel level) {
 static void gen_filename(LogFileHandler *handler, uint8_t idx) {
     char suffix[LOG_ROLL_OVER_SUFFIX_LEN]; // "_255'0'"
     char *suffix_start;
+
     snprintf(suffix, sizeof(suffix), "_%u", idx);
 
     suffix_start = strrchr(handler->filepath, '_');
@@ -65,28 +66,39 @@ static void gen_filename(LogFileHandler *handler, uint8_t idx) {
         suffix_start[sizeof(suffix) - 1] = '\0';
     }
     else {
-        strncat(handler->filepath, suffix, sizeof(handler->filepath) - strlen(handler->filepath) - 1);
+        strncat(handler->filepath, suffix, sizeof(suffix) - 1);
     }
 }
 
 void log_kill_file_handler(LogFileHandler *handler) {
-    if (handler->stream) {
+    if (handler && handler->stream) {
         fclose(handler->stream);
     }
+    memset(handler, 0, sizeof(LogFileHandler));
     return;
 }
 
 int log_init_file_handler(const char *filepath, long maxsize, LogFileHandler *handler) {
+    if (!handler) return -1;
+
     if (handler->stream) {
-        log_kill_file_handler(handler);
+        fclose(handler->stream);
     }
 
-    handler->stream = fopen(filepath, "a");
+    /* We can set filepath to NULL if we already have initialized a filepath into the handler */
+    if (filepath) {
+        handler->stream = fopen(filepath, "a");
+    }
+    else {
+        handler->stream = fopen(handler->filepath, "a");
+    }
     if (!handler->stream) {
         return -1;
     }
 
-    snprintf(handler->filepath, sizeof(handler->filepath), "%s", filepath);
+    if (filepath) {
+        snprintf(handler->filepath, sizeof(handler->filepath), "%s", filepath);
+    }
 
     if (maxsize <= 0) {
         handler->maxsize = LOG_DEFAULT_MAX_FILESIZE;
@@ -152,7 +164,7 @@ void log_to_file(const char *file, const char *func, int line, LogFileHandler *h
         if (filesize > handler->maxsize && strlen(handler->filepath) + LOG_ROLL_OVER_SUFFIX_LEN + 1 < sizeof(handler->filepath)) {
             for (i = 0; i < LOG_ROLL_OVER_MAX; i++) {
                 gen_filename(handler, i);
-                if (log_init_file_handler(handler->filepath, handler->maxsize, handler) == -1) {
+                if (log_init_file_handler(NULL, handler->maxsize, handler) == -1) {
                     continue;
                 }
                 filesize = ftell(handler->stream);
