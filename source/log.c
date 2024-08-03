@@ -94,7 +94,7 @@ int log_init_file_handler(const char *filepath, long maxsize, LogFileHandler *ha
         handler->stream = fopen(handler->filepath, "a");
     }
     if (!handler->stream) {
-        return -1;
+        return -2;
     }
 
     if (filepath) {
@@ -165,7 +165,7 @@ void log_to_file(const char *file, const char *func, int line, LogFileHandler *h
         if (filesize > handler->maxsize && strlen(handler->filepath) + LOG_ROLL_OVER_SUFFIX_LEN + 1 < sizeof(handler->filepath)) {
             for (i = 0; i < LOG_ROLL_OVER_MAX; i++) {
                 gen_filename(handler, i);
-                if (log_init_file_handler(NULL, handler->maxsize, handler) == -1) {
+                if (log_init_file_handler(NULL, handler->maxsize, handler) < 0) {
                     continue;
                 }
                 filesize = ftell(handler->stream);
