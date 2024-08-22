@@ -180,7 +180,7 @@ void log_to_file(const char *file, const char *func, int line, LogFileHandler *h
     }
     fprintf(handler->stream, "%s\n", out);
     vfprintf(handler->stream, fmt, args);
-    if (level == LOG_LEVEL_WARNING || level == LOG_LEVEL_CRITICAL) {
+    if (level == LOG_LEVEL_CRITICAL) {
         fprintf(handler->stream, "\nERRNO: %s\n", strerror(errno));
     }
     fprintf(handler->stream, "\n");
@@ -239,7 +239,7 @@ void log_to_stream(const char *file, const char *func, int line, FILE *stream, L
    
     fprintf(stream, "%s\n", out);
     vfprintf(stream, fmt, args);
-    if (level == LOG_LEVEL_WARNING || level == LOG_LEVEL_CRITICAL) {
+    if (level == LOG_LEVEL_CRITICAL) {
         fprintf(stream, "\nERRNO: %s\n", strerror(errno));
     }
     fprintf(stream, "\n");
