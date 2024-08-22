@@ -22,6 +22,9 @@ TEST_DIR = test
 # Source files
 SRCS = $(wildcard $(SRC_DIR)/*.c)
 
+# Header files
+HDRS = $(wildcard $(INC_DIR)/*.h)
+
 # Object files
 OBJS = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRCS))
 
@@ -60,9 +63,35 @@ $(TEST_EXEC): $(TEST_OBJ)
 # Build all
 all: $(TARGET)
 
+# Install library
+install:
+	make
+	sudo cp lib/$(LIB_NAME) /usr/local/lib
+	for header in $(HDRS); do \
+		sudo cp $$header /usr/local/include/; \
+	done
+
 # Build test executable
 test: $(TEST_EXEC)
 
 # Clean objects and library
 clean:
 	rm -rf $(OBJ_DIR) $(LIB_DIR) $(TEST_OBJ) $(TEST_EXEC)
+
+	if [ -f /usr/local/lib/$(LIB_NAME) ]; then \
+		sudo rm /usr/local/lib/$(LIB_NAME); \
+	fi
+
+	for header in $(HDRS); do \
+		header_name=$$(basename $$header); \
+		if [ -f /usr/local/include/$$header_name ]; then \
+			sudo rm /usr/local/include/$$header_name; \
+		fi \
+	done
+
+	for header in $(HDRS); do \
+		header_name=$$(basename $$header); \
+		if [ -f /usr/local/include/$$header_name ]; then \
+			sudo rm /usr/local/include/$$header_name; \
+		fi \
+	done
